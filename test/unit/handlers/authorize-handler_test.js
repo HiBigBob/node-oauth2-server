@@ -29,7 +29,6 @@ describe('AuthorizeHandler', function() {
       return handler.generateAuthorizationCode()
         .then(function() {
           model.generateAuthorizationCode.callCount.should.equal(1);
-          model.generateAuthorizationCode.firstCall.thisValue.should.equal(model);
         })
         .catch(should.fail);
     });
@@ -50,7 +49,6 @@ describe('AuthorizeHandler', function() {
           model.getClient.callCount.should.equal(1);
           model.getClient.firstCall.args.should.have.length(2);
           model.getClient.firstCall.args[0].should.equal(12345);
-          model.getClient.firstCall.thisValue.should.equal(model);
         })
         .catch(should.fail);
     });
@@ -94,7 +92,6 @@ describe('AuthorizeHandler', function() {
           model.saveAuthorizationCode.firstCall.args[0].should.eql({ authorizationCode: 'foo', expiresAt: 'bar', redirectUri: 'baz', scope: 'qux' });
           model.saveAuthorizationCode.firstCall.args[1].should.equal('biz');
           model.saveAuthorizationCode.firstCall.args[2].should.equal('boz');
-          model.saveAuthorizationCode.firstCall.thisValue.should.equal(model);
         })
         .catch(should.fail);
     });

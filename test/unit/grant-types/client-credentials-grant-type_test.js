@@ -27,7 +27,6 @@ describe('ClientCredentialsGrantType', function() {
           model.getUserFromClient.callCount.should.equal(1);
           model.getUserFromClient.firstCall.args.should.have.length(1);
           model.getUserFromClient.firstCall.args[0].should.equal(client);
-          model.getUserFromClient.firstCall.thisValue.should.equal(model);
         })
         .catch(should.fail);
     });
@@ -54,7 +53,6 @@ describe('ClientCredentialsGrantType', function() {
           model.saveToken.firstCall.args[0].should.eql({ accessToken: 'foo', accessTokenExpiresAt: 'biz', scope: 'foobar' });
           model.saveToken.firstCall.args[1].should.equal(client);
           model.saveToken.firstCall.args[2].should.equal(user);
-          model.saveToken.firstCall.thisValue.should.equal(model);
         })
         .catch(should.fail);
     });

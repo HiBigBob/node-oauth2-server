@@ -12,7 +12,6 @@ var InvalidArgumentError = require('../../../lib/errors/invalid-argument-error')
 var InvalidClientError = require('../../../lib/errors/invalid-client-error');
 var InvalidRequestError = require('../../../lib/errors/invalid-request-error');
 var InvalidScopeError = require('../../../lib/errors/invalid-scope-error');
-var UnsupportedResponseTypeError = require('../../../lib/errors/unsupported-response-type-error');
 var Promise = require('bluebird');
 var Request = require('../../../lib/request');
 var Response = require('../../../lib/response');
@@ -180,10 +179,7 @@ describe('AuthorizeHandler integration', function() {
     it('should redirect to an error response if a non-oauth error is thrown', function() {
       var model = {
         getAccessToken: function() {
-          return {
-            user: {},
-            accessTokenExpiresAt: new Date(new Date().getTime() + 10000)
-          };
+          return { user: {} };
         },
         getClient: function() {
           return { grants: ['authorization_code'], redirectUris: ['http://example.com/cb'] };
@@ -218,10 +214,7 @@ describe('AuthorizeHandler integration', function() {
     it('should redirect to an error response if an oauth error is thrown', function() {
       var model = {
         getAccessToken: function() {
-          return {
-            user: {},
-            accessTokenExpiresAt: new Date(new Date().getTime() + 10000)
-          };
+          return { user: {} };
         },
         getClient: function() {
           return { grants: ['authorization_code'], redirectUris: ['http://example.com/cb'] };
@@ -257,11 +250,7 @@ describe('AuthorizeHandler integration', function() {
       var client = { grants: ['authorization_code'], redirectUris: ['http://example.com/cb'] };
       var model = {
         getAccessToken: function() {
-          return {
-            client: client,
-            user: {},
-            accessTokenExpiresAt: new Date(new Date().getTime() + 10000)
-          };
+          return { client: client, user: {} };
         },
         getClient: function() {
           return client;
@@ -296,10 +285,7 @@ describe('AuthorizeHandler integration', function() {
     it('should redirect to an error response if `scope` is invalid', function() {
       var model = {
         getAccessToken: function() {
-          return {
-            user: {},
-            accessTokenExpiresAt: new Date(new Date().getTime() + 10000)
-          };
+          return { user: {} };
         },
         getClient: function() {
           return { grants: ['authorization_code'], redirectUris: ['http://example.com/cb'] };
@@ -335,10 +321,7 @@ describe('AuthorizeHandler integration', function() {
     it('should redirect to an error response if `state` is missing', function() {
       var model = {
         getAccessToken: function() {
-          return {
-            user: {},
-            accessTokenExpiresAt: new Date(new Date().getTime() + 10000)
-          };
+          return { user: {} };
         },
         getClient: function() {
           return { grants: ['authorization_code'], redirectUris: ['http://example.com/cb'] };
@@ -368,91 +351,11 @@ describe('AuthorizeHandler integration', function() {
         });
     });
 
-    it('should redirect to an error response if `response_type` is invalid', function() {
-      var model = {
-        getAccessToken: function() {
-          return {
-            user: {},
-            accessTokenExpiresAt: new Date(new Date().getTime() + 10000)
-          };
-        },
-        getClient: function() {
-          return { grants: ['authorization_code'], redirectUris: ['http://example.com/cb'] };
-        },
-        saveAuthorizationCode: function() {
-          return { authorizationCode: 12345, client: {} };
-        }
-      };
-      var handler = new AuthorizeHandler({ authorizationCodeLifetime: 120, model: model });
-      var request = new Request({
-        body: {
-          client_id: 12345,
-          response_type: 'test'
-        },
-        headers: {
-          'Authorization': 'Bearer foo'
-        },
-        method: {},
-        query: {
-          state: 'foobar'
-        }
-      });
-      var response = new Response({ body: {}, headers: {} });
-
-      return handler.handle(request, response)
-        .then(should.fail)
-        .catch(function() {
-          response.get('location').should.equal('http://example.com/cb?error=unsupported_response_type&error_description=Unsupported%20response%20type%3A%20%60response_type%60%20is%20not%20supported&state=foobar');
-        });
-    });
-
-    it('should fail on invalid `response_type` before calling model.saveAuthorizationCode()', function() {
-      var model = {
-        getAccessToken: function() {
-          return {
-            user: {},
-            accessTokenExpiresAt: new Date(new Date().getTime() + 10000)
-          };
-        },
-        getClient: function() {
-          return { grants: ['authorization_code'], redirectUris: ['http://example.com/cb'] };
-        },
-        saveAuthorizationCode: function() {
-          throw new Error('must not be reached');
-        }
-      };
-      var handler = new AuthorizeHandler({ authorizationCodeLifetime: 120, model: model });
-      var request = new Request({
-        body: {
-          client_id: 12345,
-          response_type: 'test'
-        },
-        headers: {
-          'Authorization': 'Bearer foo'
-        },
-        method: {},
-        query: {
-          state: 'foobar'
-        }
-      });
-      var response = new Response({ body: {}, headers: {} });
-
-      return handler.handle(request, response)
-        .then(should.fail)
-        .catch(function() {
-          response.get('location').should.equal('http://example.com/cb?error=unsupported_response_type&error_description=Unsupported%20response%20type%3A%20%60response_type%60%20is%20not%20supported&state=foobar');
-        });
-    });
-
     it('should return the `code` if successful', function() {
       var client = { grants: ['authorization_code'], redirectUris: ['http://example.com/cb'] };
       var model = {
         getAccessToken: function() {
-          return {
-            client: client,
-            user: {},
-            accessTokenExpiresAt: new Date(new Date().getTime() + 10000)
-          };
+          return { client: client, user: {} };
         },
         getClient: function() {
           return client;
@@ -737,7 +640,7 @@ describe('AuthorizeHandler integration', function() {
       var model = {
         getAccessToken: function() {},
         getClient: function(clientId, clientSecret, callback) {
-          should.equal(clientSecret, null);
+          clientSecret.should.eql(null);
           callback(null, { grants: ['authorization_code'], redirectUris: ['http://example.com/cb'] });
         },
         saveAuthorizationCode: function() {}
@@ -915,10 +818,7 @@ describe('AuthorizeHandler integration', function() {
       var user = {};
       var model = {
         getAccessToken: function() {
-          return {
-            user: user,
-            accessTokenExpiresAt: new Date(new Date().getTime() + 10000)
-          };
+          return { user: user };
         },
         getClient: function() {},
         saveAuthorizationCode: function() {}
@@ -1028,8 +928,8 @@ describe('AuthorizeHandler integration', function() {
 
         should.fail();
       } catch (e) {
-        e.should.be.an.instanceOf(UnsupportedResponseTypeError);
-        e.message.should.equal('Unsupported response type: `response_type` is not supported');
+        e.should.be.an.instanceOf(InvalidRequestError);
+        e.message.should.equal('Invalid parameter: `response_type`');
       }
     });
 
@@ -1042,9 +942,9 @@ describe('AuthorizeHandler integration', function() {
       };
         var handler = new AuthorizeHandler({ authorizationCodeLifetime: 120, model: model });
         var request = new Request({ body: { response_type: 'code' }, headers: {}, method: {}, query: {} });
-        var ResponseType = handler.getResponseType(request);
+        var responseType = handler.getResponseType(request, { authorizationCode: 123 });
 
-        ResponseType.should.equal(CodeResponseType);
+        responseType.should.be.an.instanceOf(CodeResponseType);
       });
     });
 
@@ -1057,9 +957,9 @@ describe('AuthorizeHandler integration', function() {
       };
         var handler = new AuthorizeHandler({ authorizationCodeLifetime: 120, model: model });
         var request = new Request({ body: {}, headers: {}, method: {}, query: { response_type: 'code' } });
-        var ResponseType = handler.getResponseType(request);
+        var responseType = handler.getResponseType(request, { authorizationCode: 123 });
 
-        ResponseType.should.equal(CodeResponseType);
+        responseType.should.be.an.instanceOf(CodeResponseType);
       });
     });
   });
